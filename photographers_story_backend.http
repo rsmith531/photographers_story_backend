@@ -1,0 +1,6 @@
+@photographers_story_backend_HostAddress = http://localhost:5109
+
+GET {{photographers_story_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
