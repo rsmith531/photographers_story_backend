@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyApp.Namespace
+namespace PhotographersStoryApi
 {
-    [Route("api/[controller]")]
+    [Route("api/Health")]
     [ApiController]
     public class HealthController : ControllerBase
     {
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return NoContent();
+        }
     }
 }
