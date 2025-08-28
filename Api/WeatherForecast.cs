@@ -1,4 +1,4 @@
-namespace PhotographersStoryApi;
+namespace Api;
 
 public class WeatherForecast
 {
