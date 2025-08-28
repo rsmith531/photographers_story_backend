@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace photographers_story_backend.Controllers;
+namespace PhotographersStoryApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
