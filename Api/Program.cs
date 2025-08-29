@@ -2,6 +2,7 @@
 // https://timdeschryver.dev/blog/what-about-my-api-documentation-now-that-swashbuckle-is-no-longer-a-dependency-in-aspnet-9
 
 using Scalar.AspNetCore;
+using Swashbuckle.AspNetCore.ReDoc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,23 +32,24 @@ if (app.Environment.IsDevelopment())
 }
 
 // Render the OpenAPI document using NSwag's Swagger UI
-// Available at https://localhost:{port}/swagger
+// Available at https://localhost:{port}/api/swagger
 app.UseSwaggerUi(options =>
 {
     options.DocumentPath = "/openapi/v1.json";
+    options.Path = "/api/swagger";
 });
 
 // Render the OpenAPI document using NSwag's version of Redoc
-// Available at https://localhost:{port}/api-docs
+// Available at https://localhost:{port}/api/redoc
 app.UseReDoc(options =>
 {
-    options.DocumentTitle = "Open API - ReDoc";
-    options.SpecUrl("/openapi/v1.json");
+    options.DocumentPath = "/openapi/v1.json";
+    options.Path = "/api/redoc";
 });
 
 // Render the OpenAPI document using Scalar
 // Available at https://localhost:{port}/scalar/v1
-app.MapScalarApiReference();
+app.MapScalarApiReference("api/scalar");
 
 app.UseHttpsRedirection();
 
