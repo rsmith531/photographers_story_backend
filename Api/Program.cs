@@ -48,7 +48,7 @@ app.UseReDoc(options =>
 });
 
 // Render the OpenAPI document using Scalar
-// Available at https://localhost:{port}/scalar/v1
+// Available at https://localhost:{port}/api/scalar
 app.MapScalarApiReference("api/scalar");
 
 app.UseHttpsRedirection();
