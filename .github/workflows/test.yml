@@ -34,4 +34,4 @@ jobs:
     # Run the XUnit tests in the 'Tests' project
     # The --verbosity normal flag provides standard output for test results
     - name: Run Tests
-      run: dotnet test photographers_story_backend.sln --verbosity normal --no-build --configuration Release
+      run: dotnet test photographers_story_backend.sln --configuration Release
