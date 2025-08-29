@@ -1,0 +1,91 @@
+name: Test and Deploy to Staging
+
+on:
+  # Trigger the workflow when a pull request is opened/updated to the 'main' branch
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    # Run on the latest Ubuntu environment provided by GitHub Actions
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Set up the .NET SDK version 9.0
+    - name: Setup .NET 9.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x' # Use the latest patch version of .NET 9.0
+
+    # Restore NuGet packages for the entire solution
+    # This ensures all project dependencies are available before building/testing
+    - name: Restore Dependencies
+      run: dotnet restore photographers_story_backend.sln
+
+    # Build the entire solution to ensure everything compiles correctly
+    - name: Build Solution
+      run: dotnet build photographers_story_backend.sln --no-restore
+
+    # Run the XUnit tests in the 'Tests' project
+    # The --verbosity normal flag provides standard output for test results
+    - name: Run Tests
+      run: dotnet test photographers_story_backend.sln --configuration Release
+
+  deploy:
+    # This job will only run if the 'test' job completes with a 'success' conclusion.
+    # It also must be a push event to the main branch.
+    if: ${{ success() }}
+    needs: test # Ensure the 'test' job completes successfully before starting.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      # The rest of your deploy steps remain the same
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            docker pull ghcr.io/${{ github.repository_owner }}/photographers-story-backend:latest
+            docker stop photographers-story-backend || true
+            docker rm photographers-story-backend || true
+            docker run -d \
+              --name photographers-story-backend \
+              -p 5001:80 \
+              ghcr.io/${{ github.repository_owner }}/photographers-story-backend:latest
+            docker logout ghcr.io
