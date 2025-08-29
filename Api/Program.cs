@@ -1,3 +1,8 @@
+// article about OpenAPI admin panels
+// https://timdeschryver.dev/blog/what-about-my-api-documentation-now-that-swashbuckle-is-no-longer-a-dependency-in-aspnet-9
+
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,11 +28,26 @@ if (app.Environment.IsProduction())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
 }
+
+// Render the OpenAPI document using NSwag's Swagger UI
+// Available at https://localhost:{port}/swagger
+app.UseSwaggerUi(options =>
+{
+    options.DocumentPath = "/openapi/v1.json";
+});
+
+// Render the OpenAPI document using NSwag's version of Redoc
+// Available at https://localhost:{port}/api-docs
+app.UseReDoc(options =>
+{
+    options.DocumentTitle = "Open API - ReDoc";
+    options.SpecUrl("/openapi/v1.json");
+});
+
+// Render the OpenAPI document using Scalar
+// Available at https://localhost:{port}/scalar/v1
+app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 

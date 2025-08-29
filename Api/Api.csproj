@@ -10,6 +10,8 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.5.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.7.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="9.0.4" />
   </ItemGroup>
 
 </Project>
