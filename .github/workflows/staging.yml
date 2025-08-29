@@ -68,28 +68,24 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
-        env:
-            GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: |
-            GITHUB_REPOSITORY
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            docker pull ghcr.io/${{ github.repository_owner }}/$GITHUB_REPOSITORY:latest
-            docker stop $GITHUB_REPOSITORY || true
-            docker rm $GITHUB_REPOSITORY || true
+            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            docker stop ${{ github.event.repository.name }} || true
+            docker rm ${{ github.event.repository.name }} || true
             docker run -d \
-              --name $GITHUB_REPOSITORY \
+              --name ${{ github.event.repository.name }} \
               -p 5001:80 \
-              ghcr.io/${{ github.repository_owner }}/$GITHUB_REPOSITORY:latest
+              ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
             docker logout ghcr.io
