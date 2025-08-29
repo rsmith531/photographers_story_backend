@@ -10,9 +10,6 @@ on:
     # Trigger this workflow only when the referenced workflow has 'completed'.
     types:
       - completed
-    # Only consider runs of the referenced workflow that occurred on the 'main' branch.
-    branches:
-      - main
 
 jobs:
   deploy:
