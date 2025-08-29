@@ -75,17 +75,21 @@ jobs:
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
+        env:
+            GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: |
+            GITHUB_REPOSITORY
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            docker pull ghcr.io/${{ github.repository_owner }}/photographers-story-backend:latest
-            docker stop photographers-story-backend || true
-            docker rm photographers-story-backend || true
+            docker pull ghcr.io/${{ github.repository_owner }}/$GITHUB_REPOSITORY:latest
+            docker stop $GITHUB_REPOSITORY || true
+            docker rm $GITHUB_REPOSITORY || true
             docker run -d \
-              --name photographers-story-backend \
+              --name $GITHUB_REPOSITORY \
               -p 5001:80 \
-              ghcr.io/${{ github.repository_owner }}/photographers-story-backend:latest
+              ghcr.io/${{ github.repository_owner }}/$GITHUB_REPOSITORY:latest
             docker logout ghcr.io
