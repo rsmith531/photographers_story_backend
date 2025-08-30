@@ -86,6 +86,6 @@ jobs:
             docker rm ${{ github.event.repository.name }} || true
             docker run -d \
               --name ${{ github.event.repository.name }} \
-              -p 5001:80 \
+              -p 5001:8080 \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
             docker logout ghcr.io
