@@ -9,6 +9,7 @@ using System.Net; // IP address parser
 using Database.Mongo.Services;
 using Database.Connection;
 using Microsoft.Extensions.Options;
+using Database.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +43,7 @@ if (builder.Environment.IsDevelopment())
     );
 
     // Register the MongoDbService as a singleton, injecting the settings
-    builder.Services.AddSingleton(sp =>
+    builder.Services.AddSingleton<IDatabaseService>(sp =>
     {
         var settings = sp.GetRequiredService<IOptions<Mongo>>().Value;
         return new Posts(settings.ConnectionString, settings.DatabaseName);
