@@ -18,8 +18,38 @@ public class Photo
     public required string PublicUrl { get; set; }
 
     [BsonElement("width")]
-    public int Width { get; set; }
+    public uint Width { get; set; }
 
     [BsonElement("height")]
-    public int Height { get; set; }
+    public uint Height { get; set; }
+
+    /// <summary>
+    /// Maps a core Photo model to this MongoDB-specific model.
+    /// </summary>
+    public static Photo FromCore(Database.Models.Photo corePhoto)
+    {
+        return new Photo
+        {
+            Id = corePhoto.Id,
+            AltText = corePhoto.AltText,
+            PublicUrl = corePhoto.PublicUrl,
+            Width = corePhoto.Width,
+            Height = corePhoto.Height
+        };
+    }
+
+    /// <summary>
+    /// Maps this MongoDB-specific model to a core Photo model.
+    /// </summary>
+    public Database.Models.Photo ToCore()
+    {
+        return new Database.Models.Photo
+        {
+            Id = Id,
+            AltText = AltText,
+            PublicUrl = PublicUrl,
+            Width = Width,
+            Height = Height
+        };
+    }
 }

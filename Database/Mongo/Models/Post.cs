@@ -17,7 +17,7 @@ public class Post
     public required string Slug { get; set; }
 
     [BsonElement("tags")]
-    public List<string> Tags { get; set; } = new List<string>();
+    public List<string> Tags { get; set; } = [];
 
     [BsonElement("author")]
     public required string Author { get; set; }
@@ -32,7 +32,7 @@ public class Post
     public Photo? CoverPhoto { get; set; }
 
     [BsonElement("photos")]
-    public List<Photo> Photos { get; set; } = new List<Photo>();
+    public List<Photo> Photos { get; set; } = [];
 
     // as markdown
     [BsonElement("article_content")]
@@ -59,4 +59,54 @@ public class Post
 
     [BsonElement("read_time_minutes")]
     public int ReadTimeMinutes { get; set; } = 0;
+
+    /// <summary>
+    /// Maps a core Post model to this MongoDB-specific model.
+    /// </summary>
+    public static Post FromCore(Database.Models.Post corePost)
+    {
+        return new Post
+        {
+            Id = corePost.Id,
+            Slug = corePost.Slug,
+            Tags = corePost.Tags,
+            Author = corePost.Author,
+            Title = corePost.Title,
+            Summary = corePost.Summary,
+            CoverPhoto = corePost.CoverPhoto != null ? Photo.FromCore(corePost.CoverPhoto) : null,
+            Photos = [.. corePost.Photos.Select(Photo.FromCore)],
+            ArticleContent = corePost.ArticleContent,
+            CreatedAt = corePost.CreatedAt,
+            EditedAt = corePost.EditedAt,
+            PublishedAt = corePost.PublishedAt,
+            ViewCount = corePost.ViewCount,
+            Location = Location.FromCore(corePost.Location),
+            ReadTimeMinutes = corePost.ReadTimeMinutes
+        };
+    }
+
+    /// <summary>
+    /// Maps this MongoDB-specific model to a core Post model.
+    /// </summary>
+    public Database.Models.Post ToCore()
+    {
+        return new Database.Models.Post
+        {
+            Id = Id,
+            Slug = Slug,
+            Tags = Tags,
+            Author = Author,
+            Title = Title,
+            Summary = Summary,
+            CoverPhoto = CoverPhoto?.ToCore(),
+            Photos = [.. Photos.Select(p => p.ToCore())],
+            ArticleContent = ArticleContent,
+            CreatedAt = CreatedAt,
+            EditedAt = EditedAt,
+            PublishedAt = PublishedAt,
+            ViewCount = ViewCount,
+            Location = Location.ToCore(),
+            ReadTimeMinutes = ReadTimeMinutes
+        };
+    }
 }
