@@ -1,3 +1,5 @@
+# .github/workflows/production.yml
+
 name: Test and Deploy to Staging
 
 on:
@@ -82,6 +84,7 @@ jobs:
           script: |
             PR_PORT=$((5001 + ${{ github.event.pull_request.number }}))
             CONTAINER_NAME=${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
+            echo "Running $CONTAINER_NAME on port $PR_PORT"
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
             docker stop $CONTAINER_NAME || true
@@ -91,3 +94,13 @@ jobs:
               -p $PR_PORT:8080 \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
             docker logout ghcr.io
+            echo "Creating caddy snippet for port $PR_PORT."
+            mkdir -p "projects/photographers_story_backend/staging_snippets"
+            cat << EOF > "projects/photographers_story_backend/staging_snippets/${{ github.event.pull_request.number }}.caddy"
+            handle_path /${PR_PORT}/* {
+              handle /api/* {
+                reverse_proxy localhost:${PR_PORT}
+              }
+            }
+            EOF
+            caddy reload
