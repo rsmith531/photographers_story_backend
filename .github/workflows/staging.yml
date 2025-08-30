@@ -97,7 +97,7 @@ jobs:
             echo "Creating caddy snippet for port $PR_PORT."
             mkdir -p "projects/photographers_story_backend/staging_snippets"
             cat << EOF > "projects/photographers_story_backend/staging_snippets/${{ github.event.pull_request.number }}.caddy"
-            handle_path /${PR_PORT}/* {
+            handle_path /${{{ github.event.pull_request.number }}}/* {
               handle /api/* {
                 reverse_proxy localhost:${PR_PORT}
               }
