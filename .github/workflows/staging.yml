@@ -95,8 +95,8 @@ jobs:
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
             docker logout ghcr.io
             echo "Creating caddy snippet for port $PR_PORT."
-            mkdir -p " /etc/caddy/snippets/photographers_story_backend"
-            cat << EOF > " /etc/caddy/snippets/photographers_story_backend/${{ github.event.pull_request.number }}.caddy"
+            mkdir -p "/etc/caddy/snippets/photographers_story_backend"
+            cat << EOF > "/etc/caddy/snippets/photographers_story_backend/${{ github.event.pull_request.number }}.caddy"
             handle_path /${{ github.event.pull_request.number }}/* {
               handle /api/* {
                 reverse_proxy localhost:${PR_PORT}
