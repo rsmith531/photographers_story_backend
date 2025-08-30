@@ -1,3 +1,5 @@
+// Program.cs
+
 // article about OpenAPI admin panels
 // https://timdeschryver.dev/blog/what-about-my-api-documentation-now-that-swashbuckle-is-no-longer-a-dependency-in-aspnet-9
 
@@ -33,6 +35,8 @@ var app = builder.Build();
 // This middleware MUST be configured before any other middleware that depends on these headers
 app.UseForwardedHeaders();
 
+app.UsePathBase("/api");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsProduction())
 {
@@ -49,7 +53,7 @@ if (app.Environment.IsDevelopment())
 app.UseSwaggerUi(options =>
 {
     options.DocumentPath = "/openapi/v1.json";
-    options.Path = "/api/swagger";
+    options.Path = "/swagger";
 });
 
 // Render the OpenAPI document using NSwag's version of Redoc
@@ -57,12 +61,12 @@ app.UseSwaggerUi(options =>
 app.UseReDoc(options =>
 {
     options.DocumentPath = "/openapi/v1.json";
-    options.Path = "/api/redoc";
+    options.Path = "/redoc";
 });
 
 // Render the OpenAPI document using Scalar
 // Available at https://localhost:{port}/api/scalar
-app.MapScalarApiReference("api/scalar");
+app.MapScalarApiReference("/scalar");
 
 app.UseHttpsRedirection();
 
