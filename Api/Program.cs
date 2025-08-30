@@ -1,6 +1,24 @@
+// Program.cs
+
+// article about OpenAPI admin panels
+// https://timdeschryver.dev/blog/what-about-my-api-documentation-now-that-swashbuckle-is-no-longer-a-dependency-in-aspnet-9
+
+using Scalar.AspNetCore;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net; // IP address parser
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-9.0
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Add the Docker host's gateway IP to the list of known proxies
+    options.KnownProxies.Add(IPAddress.Parse("172.17.0.1"));
+});
 
 // create a cache for the generated OpenAPI document
 builder.Services.AddOutputCache(options =>
@@ -14,6 +32,11 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// This middleware MUST be configured before any other middleware that depends on these headers
+app.UseForwardedHeaders();
+
+app.UsePathBase("/api");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsProduction())
 {
@@ -23,11 +46,27 @@ if (app.Environment.IsProduction())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
 }
+
+// Render the OpenAPI document using NSwag's Swagger UI
+// Available at https://localhost:{port}/api/swagger
+app.UseSwaggerUi(options =>
+{
+    options.DocumentPath = "/openapi/v1.json";
+    options.Path = "/swagger";
+});
+
+// Render the OpenAPI document using NSwag's version of Redoc
+// Available at https://localhost:{port}/api/redoc
+app.UseReDoc(options =>
+{
+    options.DocumentPath = "/openapi/v1.json";
+    options.Path = "/redoc";
+});
+
+// Render the OpenAPI document using Scalar
+// Available at https://localhost:{port}/api/scalar
+app.MapScalarApiReference("/scalar");
 
 app.UseHttpsRedirection();
 

@@ -38,7 +38,7 @@ COPY --from=build /app/publish .
 # Expose port 80 (HTTP) within the container.
 # ASP.NET Core typically listens on 80/443 inside the container.
 # Your Caddy configuration will map external port 5001 to this internal port 80.
-EXPOSE 80
+EXPOSE 8080
 
 # Define the entry point for the container.
 # This specifies the command that will be run when the container starts.
