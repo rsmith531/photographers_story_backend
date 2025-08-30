@@ -3,6 +3,7 @@
 
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Net; // IP address parser
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
         ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Add the Docker host's gateway IP to the list of known proxies
+    options.KnownProxies.Add(IPAddress.Parse("172.17.0.1"));
 });
 
 // create a cache for the generated OpenAPI document
