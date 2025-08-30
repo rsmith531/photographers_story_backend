@@ -1,46 +1,38 @@
+# .github/workflows/staging.yml
+
 name: Test and Deploy to Staging
 
 on:
-  # Trigger the workflow when a pull request is opened/updated to the 'main' branch
   pull_request:
     branches:
       - main
 
 jobs:
   test:
-    # Run on the latest Ubuntu environment provided by GitHub Actions
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository code
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Set up the .NET SDK version 9.0
     - name: Setup .NET 9.0
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x' # Use the latest patch version of .NET 9.0
+        dotnet-version: '9.0.x'
 
-    # Restore NuGet packages for the entire solution
-    # This ensures all project dependencies are available before building/testing
     - name: Restore Dependencies
       run: dotnet restore photographers_story_backend.sln
 
-    # Build the entire solution to ensure everything compiles correctly
     - name: Build Solution
       run: dotnet build photographers_story_backend.sln --no-restore
 
-    # Run the XUnit tests in the 'Tests' project
-    # The --verbosity normal flag provides standard output for test results
     - name: Run Tests
       run: dotnet test photographers_story_backend.sln --configuration Release
 
   deploy:
-    # This job will only run if the 'test' job completes with a 'success' conclusion.
-    # It also must be a push event to the main branch.
+    # only run if the 'test' job completes with a 'success' conclusion
     if: ${{ success() }}
-    needs: test # Ensure the 'test' job completes successfully before starting.
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,7 +43,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      # The rest of your deploy steps remain the same
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -68,8 +59,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -80,12 +70,25 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            PR_PORT=$((5001 + ${{ github.event.pull_request.number }}))
+            CONTAINER_NAME=${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
+            echo "Running $CONTAINER_NAME on port $PR_PORT"
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
-            docker stop ${{ github.event.repository.name }} || true
-            docker rm ${{ github.event.repository.name }} || true
+            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
             docker run -d \
-              --name ${{ github.event.repository.name }} \
-              -p 5001:8080 \
-              ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+              --name $CONTAINER_NAME \
+              -p $PR_PORT:8080 \
+              ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
             docker logout ghcr.io
+            echo "Creating caddy snippet for port $PR_PORT."
+            mkdir -p "/etc/caddy/snippets/photographers_story_backend"
+            cat << EOF > "/etc/caddy/snippets/photographers_story_backend/${{ github.event.pull_request.number }}.caddy"
+            handle_path /${{ github.event.pull_request.number }}/* {
+              handle /api/* {
+                reverse_proxy localhost:${PR_PORT}
+              }
+            }
+            EOF
+            caddy reload
