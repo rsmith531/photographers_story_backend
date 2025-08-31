@@ -1,0 +1,15 @@
+# Database/Mongo/docker-compose.yml
+
+services:
+  database:
+    image: mongo:latest
+    container_name: photographers_story_db
+    ports:
+      - "5002:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+    driver: local
