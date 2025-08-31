@@ -52,13 +52,13 @@ public class Post
     public DateTime? PublishedAt { get; set; }
 
     [BsonElement("view_count")]
-    public int ViewCount { get; set; } = 0;
+    public uint ViewCount { get; set; } = 0;
 
     [BsonElement("location")]
     public required Location Location { get; set; }
 
     [BsonElement("read_time_minutes")]
-    public int ReadTimeMinutes { get; set; } = 0;
+    public uint ReadTimeMinutes { get; set; } = 0;
 
     /// <summary>
     /// Maps a core Post model to this MongoDB-specific model.
