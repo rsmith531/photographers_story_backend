@@ -28,7 +28,10 @@ public class Posts : IDatabaseService
     public async Task<Database.Models.Post?> GetBySlugAsync(string slug)
     {
         var filter = Builders<Models.Post>.Filter.Eq(p => p.Slug, slug);
-        var mongoPost = await _postsCollection.Find(filter).FirstOrDefaultAsync();
+        var filter2 = Builders<Models.Post>.Filter.Ne(p => p.PublishedAt, null);
+        var combinedFilter = Builders<Models.Post>.Filter.And(filter, filter2);
+
+        var mongoPost = await _postsCollection.Find(combinedFilter).FirstOrDefaultAsync();
         return mongoPost?.ToCore();
     }
 
@@ -50,7 +53,7 @@ public class Posts : IDatabaseService
     public async Task IncrementViewCountAsync(string id)
     {
         var filter = Builders<Models.Post>.Filter.Eq(p => p.Id, id);
-        var update = Builders<Models.Post>.Update.Inc(p => p.ViewCount, 1);
+        var update = Builders<Models.Post>.Update.Inc("ViewCount", 1);
         await _postsCollection.UpdateOneAsync(filter, update);
     }
 
@@ -58,7 +61,9 @@ public class Posts : IDatabaseService
     public async Task<List<Database.Models.Post>> GetPostsByTagAsync(string tag)
     {
         var filter = Builders<Models.Post>.Filter.AnyEq(p => p.Tags, tag);
-        var mongoPosts = await _postsCollection.Find(filter).ToListAsync();
+        var filter2 = Builders<Models.Post>.Filter.Ne(p => p.PublishedAt, null);
+        var combinedFilter = Builders<Models.Post>.Filter.And(filter, filter2);
+        var mongoPosts = await _postsCollection.Find(combinedFilter).ToListAsync();
         return [.. mongoPosts.Select(p => p.ToCore())];
     }
 }
