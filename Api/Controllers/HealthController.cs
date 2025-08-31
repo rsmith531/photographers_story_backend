@@ -1,13 +1,16 @@
+// Api/Controllers/HealthController.cs
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-[Route("api/Health")]
+[Route("health")]
 [ApiController]
 public class HealthController : ControllerBase
 {
     [HttpGet]
-    [EndpointSummary("A simple health check to make sure the server is online")]
+    [EndpointSummary("Server health check")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Get()
     {
         return NoContent();
