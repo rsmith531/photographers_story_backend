@@ -13,6 +13,7 @@ WORKDIR /src
 # This leverages Docker's layer caching to speed up builds if only source code changes.
 # The project file is located in the 'Api' directory within the solution.
 COPY ["Api/Api.csproj", "Api/"]
+COPY ["Database/Database.csproj", "Database/"]
 RUN dotnet restore "Api/Api.csproj"
 
 # Copy the entire solution's source code, including the Api and Tests projects.
