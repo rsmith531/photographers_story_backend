@@ -219,7 +219,6 @@ public class MongoPostsServiceTests
     public async Task UpdatePostAsync_Calls_ReplaceOneAsync()
     {
         // Arrange
-        var mockId = ObjectId.GenerateNewId().ToString();
         var mockPost = new Builders.PostBuilder().IsPublished().Build();
         var updatedMongoPost = Post.FromCore(mockPost);
 
@@ -231,13 +230,13 @@ public class MongoPostsServiceTests
         )).ReturnsAsync(new ReplaceOneResult.Acknowledged(1, 1, new BsonDocument())).Verifiable();
 
         // Act
-        await _service.UpdatePostAsync(mockId, mockPost);
+        await _service.UpdatePostAsync(mockPost.Id, mockPost);
 
         // Assert
         // Verify that ReplaceOneAsync was called once with the correct filter and updated object
         _mockCollection.Verify(c => c.ReplaceOneAsync(
             It.IsAny<FilterDefinition<Post>>(),
-            It.Is<Post>(p => p.Id == mockId && p.Title == mockPost.Title),
+            It.Is<Post>(p => p.Id == mockPost.Id && p.Title == mockPost.Title),
             It.IsAny<ReplaceOptions>(),
             It.IsAny<CancellationToken>()
         ), Times.Once);
