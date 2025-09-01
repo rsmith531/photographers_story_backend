@@ -35,7 +35,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Conditionally configure the database service based on the environment
-if (builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
 {
     // Bind the MongoDbDatabase section of appsettings.json to the settings class
     builder.Services.Configure<Mongo>(
