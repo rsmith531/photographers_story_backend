@@ -100,6 +100,7 @@ jobs:
             docker run -d \
               --name $CONTAINER_NAME \
               --network $NETWORK_NAME \
+              -v ${DB_CONTAINER_NAME}-data:/data/db \
               -p $PR_PORT:8080 \
               -e "ASPNETCORE_ENVIRONMENT=Staging" \
               -e "MongoDbDatabase__ConnectionString=mongodb://${DB_CONTAINER_NAME}:27017" \

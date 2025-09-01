@@ -36,6 +36,7 @@ jobs:
             docker stop $CONTAINER_NAME $DB_CONTAINER_NAME || true
             docker rm $CONTAINER_NAME $DB_CONTAINER_NAME || true
             docker network rm $NETWORK_NAME || true
+            docker volume rm ${DB_CONTAINER_NAME}-data || true
 
 
             echo "Removing caddy snippet for port $PR_PORT."
