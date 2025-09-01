@@ -1,9 +1,9 @@
 // Tests/Database/Builders/Mongo.cs
 
-using Database.Mongo.Models;
+using Database.Models;
 using MongoDB.Bson;
 
-namespace Tests.Builders.Mongo;
+namespace Tests.Builders;
 
 public class PostBuilder
 {
@@ -28,7 +28,8 @@ public class PostBuilder
                 Latitude = 41.1561268114726,
                 Longitude = -81.41418385982185
             },
-            Summary = "A post for testing purposes"
+            Summary = "A post for testing purposes",
+            ReadTimeMinutes = 5
         };
     }
 

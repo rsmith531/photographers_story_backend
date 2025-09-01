@@ -2,7 +2,7 @@ using Moq;
 using MongoDB.Driver;
 using Database.Mongo.Services;
 using Database.Mongo.Models;
-using Tests.Builders;
+using Tests.Builders.Mongo;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
