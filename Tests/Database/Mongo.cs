@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using Database.Mongo.Services;
 using Database.Mongo.Models;
 using Tests.Builders.Mongo;
+using Tests.Builders;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
@@ -51,8 +52,8 @@ public class MongoPostsServiceTests
     public async Task GetPublishedPostsAsync_Returns_OnlyPublishedPosts()
     {
         // Arrange
-        var publishedPost = new PostBuilder().IsPublished().Build();
-        var draftPost = new PostBuilder().IsDraft().Build();
+        var publishedPost = new Builders.Mongo.PostBuilder().IsPublished().Build();
+        var draftPost = new Builders.Mongo.PostBuilder().IsDraft().Build();
         var mockPosts = new List<Post> { publishedPost, draftPost };
 
         // Configure the cursor mock to return our mock data
@@ -99,7 +100,7 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var expectedSlug = "published-post-slug";
-        var mockPost = new PostBuilder().IsPublished().WithSlug(expectedSlug).Build();
+        var mockPost = new Builders.Mongo.PostBuilder().IsPublished().WithSlug(expectedSlug).Build();
         _mockCursor.SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true)
             .ReturnsAsync(false);
@@ -141,7 +142,7 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var slug = "draft-post";
-        var draftPost = new PostBuilder().IsDraft().WithSlug(slug).Build();
+        var draftPost = new Builders.Mongo.PostBuilder().IsDraft().WithSlug(slug).Build();
         // We configure the mock cursor to return no data
         _mockCursor.SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
@@ -192,23 +193,7 @@ public class MongoPostsServiceTests
     public async Task CreatePostAsync_Calls_InsertOneAsync()
     {
         // Arrange
-        var mockPost = new global::Database.Models.Post
-        {
-            Id = ObjectId.GenerateNewId().ToString(),
-            ArticleContent = "Test content",
-            Author = "Test Author",
-            Location = new global::Database.Models.Location
-            {
-                Id = ObjectId.GenerateNewId().ToString(),
-                Place = "Test City",
-                Latitude = 41.1561268114726,
-                Longitude = -81.41418385982185
-            },
-            ReadTimeMinutes = 5,
-            Slug = "test-title",
-            Summary = "Made to test the mongo service",
-            Title = "Test Title"
-        };
+        var mockPost = new Builders.PostBuilder().IsPublished().Build();
         var mongoPost = Post.FromCore(mockPost);
 
         // Configure the mock to do nothing when InsertOneAsync is called
@@ -235,23 +220,7 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var mockId = ObjectId.GenerateNewId().ToString();
-        var mockPost = new global::Database.Models.Post
-        {
-            Id = mockId,
-            ArticleContent = "Test content",
-            Author = "Test Author",
-            Location = new global::Database.Models.Location
-            {
-                Id = ObjectId.GenerateNewId().ToString(),
-                Place = "Test City",
-                Latitude = 41.1561268114726,
-                Longitude = -81.41418385982185
-            },
-            ReadTimeMinutes = 5,
-            Slug = "test-title",
-            Summary = "Made to test the mongo service",
-            Title = "Test Title"
-        };
+        var mockPost = new Builders.PostBuilder().IsPublished().Build();
         var updatedMongoPost = Post.FromCore(mockPost);
 
         _mockCollection.Setup(c => c.ReplaceOneAsync(
@@ -322,10 +291,10 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var tag = "photography";
-        var postWithTag = new PostBuilder().IsPublished().Build();
-        var anotherPostWithTag = new PostBuilder().IsPublished().WithSlug("another-post").Build();
-        var postWithoutTag = new PostBuilder().IsPublished().WithSlug("no-tag-post").Build(); // This one should be filtered out
-        var unpublishedPostWithTag = new PostBuilder().IsDraft().WithSlug("unpublished-post").Build(); // This one should be filtered out
+        var postWithTag = new Builders.Mongo.PostBuilder().IsPublished().Build();
+        var anotherPostWithTag = new Builders.Mongo.PostBuilder().IsPublished().WithSlug("another-post").Build();
+        var postWithoutTag = new Builders.Mongo.PostBuilder().IsPublished().WithSlug("no-tag-post").Build(); // This one should be filtered out
+        var unpublishedPostWithTag = new Builders.Mongo.PostBuilder().IsDraft().WithSlug("unpublished-post").Build(); // This one should be filtered out
         postWithTag.Tags.Add(tag);
         anotherPostWithTag.Tags.Add(tag);
         unpublishedPostWithTag.Tags.Add(tag);
