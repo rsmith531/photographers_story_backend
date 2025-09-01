@@ -12,7 +12,6 @@ on:
 jobs:
 
   cleanup_staging:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,13 +27,23 @@ jobs:
           script: |
             PR_PORT=$((5001 + ${{ github.event.pull_request.number }}))
             CONTAINER_NAME=${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
-            echo "Removing $CONTAINER_NAME on port $PR_PORT"
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
+            DB_CONTAINER_NAME=${CONTAINER_NAME}-db
+            NETWORK_NAME=${CONTAINER_NAME}-net
+
+            echo "Cleaning up environment for PR #${{ github.event.pull_request.number }} on port $PR_PORT"
+
+            echo "Removing Docker artifacts"
+            docker stop $CONTAINER_NAME $DB_CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME $DB_CONTAINER_NAME || true
+            docker network rm $NETWORK_NAME || true
+            docker volume rm ${DB_CONTAINER_NAME}-data || true
+
+
             echo "Removing caddy snippet for port $PR_PORT."
-            mkdir -p "/etc/caddy/snippets/photographers_story_backend"
             rm "/etc/caddy/snippets/photographers_story_backend/${{ github.event.pull_request.number }}.caddy" || true
             caddy reload
+
+            echo "Cleanup for PR #${{ github.event.pull_request.number }} on port $PR_PORT complete"
 
   deploy_production:
     needs: cleanup_staging

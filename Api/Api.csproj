@@ -14,4 +14,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="9.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Database\Database.csproj" />
+  </ItemGroup>
+
 </Project>

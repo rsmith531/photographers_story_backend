@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Tests;
+namespace Tests.Api;
 
 public class HealthControllerTests
 {
@@ -8,7 +8,8 @@ public class HealthControllerTests
     public void HealthCheck_Returns204_ForGetRequest()
     {
         // Arrange
-        var controller = new Api.Controllers.HealthController();
+        // avoid the namespace collision with the test namespace
+        var controller = new global::Api.Controllers.HealthController();
         
         // Act
         var result = controller.Get();

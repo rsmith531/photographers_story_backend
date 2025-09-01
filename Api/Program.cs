@@ -1,4 +1,4 @@
-// Program.cs
+// Api/Program.cs
 
 // article about OpenAPI admin panels
 // https://timdeschryver.dev/blog/what-about-my-api-documentation-now-that-swashbuckle-is-no-longer-a-dependency-in-aspnet-9
@@ -6,6 +6,10 @@
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Net; // IP address parser
+using Database.Mongo.Services;
+using Database.Connection;
+using Microsoft.Extensions.Options;
+using Database.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,22 @@ builder.Services.AddOutputCache(options =>
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Conditionally configure the database service based on the environment
+if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
+{
+    // Bind the MongoDbDatabase section of appsettings.json to the settings class
+    builder.Services.Configure<Mongo>(
+        builder.Configuration.GetSection("MongoDbDatabase")
+    );
+
+    // Register the MongoDbService as a singleton, injecting the settings
+    builder.Services.AddSingleton<IDatabaseService>(sp =>
+    {
+        var settings = sp.GetRequiredService<IOptions<Mongo>>().Value;
+        return new Posts(settings.ConnectionString, settings.DatabaseName);
+    });
+}
 
 var app = builder.Build();
 

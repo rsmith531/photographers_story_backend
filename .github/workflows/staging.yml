@@ -72,16 +72,44 @@ jobs:
           script: |
             PR_PORT=$((5001 + ${{ github.event.pull_request.number }}))
             CONTAINER_NAME=${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
-            echo "Running $CONTAINER_NAME on port $PR_PORT"
+            DB_CONTAINER_NAME=${CONTAINER_NAME}-db
+            NETWORK_NAME=${CONTAINER_NAME}-net
+
+            echo "Configuring environment for ${{ github.event.repository.name }} PR #${{ github.event.pull_request.number }} on port $PR_PORT"
+
+            # Get the latest API image from GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
+
+            # Create a dedicated network for the PR
+            docker network create $NETWORK_NAME || true
+
+            # stop any existing containers
+            docker stop $CONTAINER_NAME $DB_CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME $DB_CONTAINER_NAME || true
+
+            echo "Starting MongoDB container $DB_CONTAINER_NAME"
+            docker run -d \
+              --name $DB_CONTAINER_NAME \
+              --network $NETWORK_NAME \
+              --restart unless-stopped \
+              mongo:latest
+
+
+            echo "Starting API container $CONTAINER_NAME on port $PR_PORT"
             docker run -d \
               --name $CONTAINER_NAME \
+              --network $NETWORK_NAME \
+              -v ${DB_CONTAINER_NAME}-data:/data/db \
               -p $PR_PORT:8080 \
+              -e "ASPNETCORE_ENVIRONMENT=Staging" \
+              -e "MongoDbDatabase__ConnectionString=mongodb://${DB_CONTAINER_NAME}:27017" \
+              -e "MongoDbDatabase__DatabaseName=${{ github.event.repository.name }}-${{ github.event.pull_request.number }}" \
+              --restart unless-stopped \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.event.pull_request.number }}
+
             docker logout ghcr.io
+
             echo "Creating caddy snippet for port $PR_PORT."
             mkdir -p "/etc/caddy/snippets/photographers_story_backend"
             cat << EOF > "/etc/caddy/snippets/photographers_story_backend/${{ github.event.pull_request.number }}.caddy"
@@ -91,4 +119,7 @@ jobs:
               }
             }
             EOF
+
             caddy reload
+
+            echo "Deployment for PR #${{ github.event.pull_request.number }} on port $PR_PORT complete"
