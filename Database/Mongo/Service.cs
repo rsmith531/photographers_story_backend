@@ -2,11 +2,14 @@
 
 using MongoDB.Driver;
 using Database.Interfaces;
+using System.Text.RegularExpressions;
+using MongoDB.Bson;
 
 namespace Database.Mongo.Services;
 
 public class Posts(IMongoCollection<Models.Post> postsCollection) : IDatabaseService
 {
+
     private readonly IMongoCollection<Models.Post> _postsCollection = postsCollection;
 
     public Posts(string connectionString, string databaseName) : this(
@@ -34,10 +37,45 @@ public class Posts(IMongoCollection<Models.Post> postsCollection) : IDatabaseSer
     }
 
     /// <inheritdoc />
-    public async Task CreatePostAsync(Database.Models.Post newPost)
+    public async Task<string> CreatePostAsync(Database.Models.PostDTO newPost)
     {
-        var mongoPost = Models.Post.FromCore(newPost);
+        // Generate a URL-friendly slug from the title.
+        // This converts the title to lowercase, replaces spaces and other whitespace
+        // with a single dash, and removes any characters that are not
+        // alphanumeric or a dash.
+        var slug = newPost.Title.Trim().ToLower();
+        slug = Regex.Replace(slug, @"\s+", "-"); // Replace whitespace with a dash
+        slug = Regex.Replace(slug, @"[^a-z0-9-]", ""); // Remove invalid chars
+        slug = Regex.Replace(slug, @"-+", "-"); // Ensure single dashes
+
+        // Calculate the estimated reading time based on the article's word count.
+        var wordCount = newPost.ArticleContent?.Split([' ', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
+
+        // TODO: move into a helper function
+        // TODO: handle markdown and images in calculation
+        // Divide word count by the average reading speed and round to the nearest whole number.
+        var readTime = (int)Math.Round((double)wordCount / 265); // Average reading speed in words per minute.
+
+        var post = new Database.Models.Post()
+        {
+            Id = ObjectId.GenerateNewId().ToString(),
+            Slug = slug,
+            Tags = newPost.Tags,
+            Author = newPost.Author,
+            Title = newPost.Title,
+            Summary = newPost.Summary,
+            CoverPhoto = newPost.CoverPhoto,
+            Photos = newPost.Photos,
+            ArticleContent = newPost.ArticleContent,
+            PublishedAt = newPost.PublishedAt ? DateTime.UtcNow : null,
+            Location = newPost.Location,
+            ReadTimeMinutes = (uint)readTime
+        };
+
+        var mongoPost = Models.Post.FromCore(post);
         await _postsCollection.InsertOneAsync(mongoPost);
+
+        return slug;
     }
 
     /// <inheritdoc />
