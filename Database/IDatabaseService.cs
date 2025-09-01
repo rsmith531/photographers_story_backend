@@ -48,4 +48,6 @@ public interface IDatabaseService
     /// <param name="tag">The tag to search for.</param>
     /// <returns>A list of posts with the given tag.</returns>
     Task<List<Post>> GetPostsByTagAsync(string tag);
+
+    // TODO: add publish and unpublish methods
 }

@@ -69,6 +69,7 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     }
 
     // TODO: make all the params optional and just overwrite the ones provided
+    // TODO: handle not found post ids
     /// <summary>
     /// Updates an existing post.
     /// </summary>
