@@ -45,6 +45,12 @@ public class PostBuilder
         return this;
     }
 
+    public PostBuilder WithTags(List<string> tags)
+    {
+        _post.Tags = tags;
+        return this;
+    }
+
     public PostBuilder IsPublished()
     {
         _post.PublishedAt = DateTime.UtcNow;
