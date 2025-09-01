@@ -62,10 +62,10 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     [EndpointSummary("Create a new post")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/json")]
-    public async Task<IActionResult> CreatePost([FromBody] Post newPost)
+    public async Task<IActionResult> CreatePost([FromBody] PostDTO newPost)
     {
-        await _databaseService.CreatePostAsync(newPost);
-        return CreatedAtAction(nameof(GetPostBySlug), new { slug = newPost.Slug }, newPost);
+        string slug = await _databaseService.CreatePostAsync(newPost);
+        return CreatedAtAction(nameof(GetPostBySlug), new { slug }, newPost);
     }
 
     // TODO: make all the params optional and just overwrite the ones provided
