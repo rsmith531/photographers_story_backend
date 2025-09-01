@@ -1,3 +1,5 @@
+// Api/Controllers/PostsController.cs
+
 using Microsoft.AspNetCore.Mvc;
 using Database.Interfaces;
 using Database.Models;

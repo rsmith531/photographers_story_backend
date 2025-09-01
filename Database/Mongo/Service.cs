@@ -5,16 +5,14 @@ using Database.Interfaces;
 
 namespace Database.Mongo.Services;
 
-public class Posts : IDatabaseService
+public class Posts(IMongoCollection<Models.Post> postsCollection) : IDatabaseService
 {
-    private readonly IMongoCollection<Models.Post> _postsCollection;
+    private readonly IMongoCollection<Models.Post> _postsCollection = postsCollection;
 
-    public Posts(string connectionString, string databaseName)
-    {
-        var client = new MongoClient(connectionString);
-        var database = client.GetDatabase(databaseName);
-        _postsCollection = database.GetCollection<Models.Post>("posts");
-    }
+    public Posts(string connectionString, string databaseName) : this(
+        new MongoClient(connectionString).GetDatabase(databaseName).GetCollection<Models.Post>("posts")
+    )
+    { }
 
     /// <inheritdoc />
     public async Task<List<Database.Models.Post>> GetPublishedPostsAsync()
