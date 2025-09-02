@@ -15,11 +15,10 @@ public class PostBuilder
             Title = "Default Test Post Title",
             ArticleContent = "This is the default post body.",
             Author = "Test Person",
-            PublishedAt = false,
+            IsPublished = false,
             Tags = ["photography", "test"],
-            Location = new Location
+            Location = new LocationDTO
             {
-                Id = "1",
                 Place = "Test City",
                 Latitude = 41.1561268114726,
                 Longitude = -81.41418385982185
@@ -42,13 +41,13 @@ public class PostBuilder
 
     public PostBuilder IsPublished()
     {
-        _post.PublishedAt = true;
+        _post.IsPublished = true;
         return this;
     }
 
     public PostBuilder IsDraft()
     {
-        _post.PublishedAt = false;
+        _post.IsPublished = false;
         return this;
     }
 

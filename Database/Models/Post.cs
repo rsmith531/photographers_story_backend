@@ -21,7 +21,7 @@ public class Post
     public uint ViewCount { get; set; } = 0;
     public required Location Location { get; set; }
     public required uint ReadTimeMinutes { get; set; }
-    
+
     public static Post Create(PostDTO newPost)
     {
         // Compute the slug
@@ -48,8 +48,8 @@ public class Post
             CoverPhoto = newPost.CoverPhoto,
             Photos = newPost.Photos,
             ArticleContent = newPost.ArticleContent,
-            PublishedAt = newPost.PublishedAt ? DateTime.UtcNow : null,
-            Location = newPost.Location,
+            PublishedAt = newPost.IsPublished ? DateTime.UtcNow : null,
+            Location = Location.Create(newPost.Location),
             ReadTimeMinutes = (uint)readTime
         };
     }
@@ -64,6 +64,6 @@ public class PostDTO
     public Photo? CoverPhoto { get; set; }
     public List<Photo> Photos { get; set; } = [];
     public required string ArticleContent { get; set; }
-    public required bool PublishedAt { get; set; }
-    public required Location Location { get; set; }
+    public required bool IsPublished { get; set; }
+    public required LocationDTO Location { get; set; }
 }
