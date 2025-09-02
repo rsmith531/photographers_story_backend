@@ -1,26 +1,22 @@
 // Tests/Database/Builders/Mongo.cs
 
 using Database.Models;
-using MongoDB.Bson;
 
 namespace Tests.Builders;
 
 public class PostBuilder
 {
-    private readonly Post _post;
+    private readonly PostDTO _post;
 
     public PostBuilder()
     {
-        _post = new Post
+        _post = new PostDTO
         {
-            Id = ObjectId.GenerateNewId().ToString(),
             Title = "Default Test Post Title",
-            Slug = "default-test-post-slug",
             ArticleContent = "This is the default post body.",
             Author = "Test Person",
-            PublishedAt = null,
+            PublishedAt = false,
             Tags = ["photography", "test"],
-            CreatedAt = DateTime.UtcNow,
             Location = new Location
             {
                 Id = "1",
@@ -29,19 +25,12 @@ public class PostBuilder
                 Longitude = -81.41418385982185
             },
             Summary = "A post for testing purposes",
-            ReadTimeMinutes = 5
         };
     }
 
     public PostBuilder WithTitle(string title)
     {
         _post.Title = title;
-        return this;
-    }
-
-    public PostBuilder WithSlug(string slug)
-    {
-        _post.Slug = slug;
         return this;
     }
 
@@ -53,17 +42,17 @@ public class PostBuilder
 
     public PostBuilder IsPublished()
     {
-        _post.PublishedAt = DateTime.UtcNow;
+        _post.PublishedAt = true;
         return this;
     }
 
     public PostBuilder IsDraft()
     {
-        _post.PublishedAt = null;
+        _post.PublishedAt = false;
         return this;
     }
 
-    public Post Build()
+    public PostDTO Build()
     {
         return _post;
     }

@@ -2,8 +2,6 @@ using Moq;
 using MongoDB.Driver;
 using Database.Mongo.Services;
 using Database.Mongo.Models;
-using Tests.Builders.Mongo;
-using Tests.Builders;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
@@ -194,7 +192,7 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var mockPost = new Builders.PostBuilder().IsPublished().Build();
-        var mongoPost = Post.FromCore(mockPost);
+        var mongoPost = Post.FromCore(global::Database.Models.Post.Create(mockPost));
 
         // Configure the mock to do nothing when InsertOneAsync is called
         _mockCollection.Setup(c => c.InsertOneAsync(
@@ -219,7 +217,7 @@ public class MongoPostsServiceTests
     public async Task UpdatePostAsync_Calls_ReplaceOneAsync()
     {
         // Arrange
-        var mockPost = new Builders.PostBuilder().IsPublished().Build();
+        var mockPost = global::Database.Models.Post.Create(new Builders.PostBuilder().IsPublished().Build());
         var updatedMongoPost = Post.FromCore(mockPost);
 
         _mockCollection.Setup(c => c.ReplaceOneAsync(
