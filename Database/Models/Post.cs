@@ -45,8 +45,8 @@ public class Post
             Author = newPost.Author,
             Title = newPost.Title,
             Summary = newPost.Summary,
-            CoverPhoto = newPost.CoverPhoto,
-            Photos = newPost.Photos,
+            CoverPhoto = newPost.CoverPhoto != null ? Photo.Create(newPost.CoverPhoto) : null,
+            Photos = [.. newPost.Photos.Select(Photo.Create)],
             ArticleContent = newPost.ArticleContent,
             PublishedAt = newPost.IsPublished ? DateTime.UtcNow : null,
             Location = Location.Create(newPost.Location),
@@ -61,8 +61,8 @@ public class PostDTO
     public required string Author { get; set; }
     public required string Title { get; set; }
     public required string Summary { get; set; }
-    public Photo? CoverPhoto { get; set; }
-    public List<Photo> Photos { get; set; } = [];
+    public PhotoDTO? CoverPhoto { get; set; }
+    public List<PhotoDTO> Photos { get; set; } = [];
     public required string ArticleContent { get; set; }
     public required bool IsPublished { get; set; }
     public required LocationDTO Location { get; set; }

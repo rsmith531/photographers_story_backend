@@ -1,6 +1,5 @@
 // Database/Models/Location.cs
 
-
 using MongoDB.Bson;
 
 namespace Database.Models;
