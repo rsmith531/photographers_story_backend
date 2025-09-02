@@ -15,10 +15,10 @@ public class Post
     public Photo? CoverPhoto { get; set; }
     public List<Photo> Photos { get; set; } = [];
     public required string ArticleContent { get; set; } // as markdown
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? EditedAt { get; set; } = null;
     public DateTime? PublishedAt { get; set; } = null; // null value indicates the post has not yet been published
-    public uint ViewCount { get; } = 0;
+    public uint ViewCount { get; set; } = 0;
     public required Location Location { get; set; }
     public required uint ReadTimeMinutes { get; set; }
     
