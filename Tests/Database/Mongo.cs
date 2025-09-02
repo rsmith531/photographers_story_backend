@@ -2,8 +2,6 @@ using Moq;
 using MongoDB.Driver;
 using Database.Mongo.Services;
 using Database.Mongo.Models;
-using Tests.Builders.Mongo;
-using Tests.Builders;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
@@ -194,7 +192,7 @@ public class MongoPostsServiceTests
     {
         // Arrange
         var mockPost = new Builders.PostBuilder().IsPublished().Build();
-        var mongoPost = Post.FromCore(mockPost);
+        var mongoPost = Post.FromCore(global::Database.Models.Post.Create(mockPost));
 
         // Configure the mock to do nothing when InsertOneAsync is called
         _mockCollection.Setup(c => c.InsertOneAsync(
@@ -221,7 +219,7 @@ public class MongoPostsServiceTests
         // Arrange
         var mockId = ObjectId.GenerateNewId().ToString();
         var mockPost = new Builders.PostBuilder().IsPublished().Build();
-        var updatedMongoPost = Post.FromCore(mockPost);
+        var updatedMongoPost = Post.FromCore(global::Database.Models.Post.Create(mockPost));
 
         _mockCollection.Setup(c => c.ReplaceOneAsync(
             It.IsAny<FilterDefinition<Post>>(),
@@ -231,7 +229,7 @@ public class MongoPostsServiceTests
         )).ReturnsAsync(new ReplaceOneResult.Acknowledged(1, 1, new BsonDocument())).Verifiable();
 
         // Act
-        await _service.UpdatePostAsync(mockId, mockPost);
+        await _service.UpdatePostAsync(mockId, global::Database.Models.Post.Create(mockPost));
 
         // Assert
         // Verify that ReplaceOneAsync was called once with the correct filter and updated object

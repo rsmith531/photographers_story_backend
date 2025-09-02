@@ -23,7 +23,7 @@ public class PostsControllerTests
     public async Task GetPublishedPosts_Returns_Ok_When_Posts_Exist()
     {
         // Arrange
-        var posts = new List<Post> { new Builders.PostBuilder().Build(), new Builders.PostBuilder().Build() };
+        var posts = new List<Post> { Post.Create(new Builders.PostBuilder().Build()), Post.Create(new Builders.PostBuilder().Build()) };
         _mockDatabaseService.Setup(s => s.GetPublishedPostsAsync()).ReturnsAsync(posts);
 
         // Act
@@ -53,8 +53,8 @@ public class PostsControllerTests
     public async Task GetPostBySlug_Returns_Ok_When_Post_Exists()
     {
         // Arrange
-        var slug = "test-post";
-        var post = new Builders.PostBuilder().WithSlug(slug).Build();
+        var post = Post.Create(new Builders.PostBuilder().Build());
+        var slug = post.Slug;
         _mockDatabaseService.Setup(s => s.GetBySlugAsync(slug)).ReturnsAsync(post);
 
         // Act
@@ -85,7 +85,8 @@ public class PostsControllerTests
     {
         // Arrange
         var post = new Builders.PostBuilder().Build();
-        _mockDatabaseService.Setup(s => s.CreatePostAsync(post)).Returns(Task.CompletedTask);
+        var constructedPost = Post.Create(post);
+        _mockDatabaseService.Setup(s => s.CreatePostAsync(post)).ReturnsAsync(constructedPost.Slug);
 
         // Act
         var result = await _controller.CreatePost(post);
@@ -98,7 +99,7 @@ public class PostsControllerTests
     public async Task UpdatePost_Returns_NoContent_When_Post_Updated()
     {
         // Arrange
-        var post = new Builders.PostBuilder().Build();
+        var post = Post.Create(new Builders.PostBuilder().Build());
         _mockDatabaseService.Setup(s => s.UpdatePostAsync(post.Id, post)).Returns(Task.CompletedTask);
 
         // Act
@@ -112,7 +113,7 @@ public class PostsControllerTests
     public async Task IncrementViewCount_Returns_NoContent_When_Count_Incremented()
     {
         // Arrange
-        var post = new Builders.PostBuilder().Build();
+        var post = Post.Create(new Builders.PostBuilder().Build());
         _mockDatabaseService.Setup(s => s.IncrementViewCountAsync(post.Id)).Returns(Task.CompletedTask);
 
         // Act
@@ -127,7 +128,7 @@ public class PostsControllerTests
     {
         // Arrange
         var tag = "test-tag";
-        var posts = new List<Post> { new Builders.PostBuilder().WithTags([tag]).Build() };
+        var posts = new List<Post> { Post.Create(new Builders.PostBuilder().WithTags([tag]).Build()) };
         _mockDatabaseService.Setup(s => s.GetPostsByTagAsync(tag)).ReturnsAsync(posts);
 
         // Act
