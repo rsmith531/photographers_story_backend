@@ -60,9 +60,10 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     /// <returns>A 201 Created response.</returns>
     [HttpPost]
     [EndpointSummary("Create a new post")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/json")]
-    public async Task<IActionResult> CreatePost([FromBody] PostDTO newPost)
+    public async Task<IActionResult> CreatePost([FromForm] PostDTO newPost)
     {
         string slug = await _databaseService.CreatePostAsync(newPost);
         return CreatedAtAction(nameof(GetPostBySlug), new { slug }, newPost);
@@ -78,11 +79,12 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     /// <returns>A 204 No Content response if successful.</returns>
     [HttpPut("{id}")]
     [EndpointSummary("Update a post")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, "application/json")]
-    public async Task<IActionResult> UpdatePost(string id, [FromBody] Post updatedPost)
+    public async Task<IActionResult> UpdatePost(string id, [FromForm] PostDTO updatedPost)
     {
-        await _databaseService.UpdatePostAsync(id, updatedPost);
+        await _databaseService.UpdatePostAsync(id, Post.Create(updatedPost));
         return NoContent();
     }
 

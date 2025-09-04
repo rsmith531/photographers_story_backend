@@ -1,6 +1,7 @@
 // Database/Models/Photo.cs
 
 using MongoDB.Bson;
+using Microsoft.AspNetCore.Http;
 
 namespace Database.Models;
 
@@ -27,6 +28,7 @@ public class Photo
 
 public class PhotoDTO
 {
+    public required IFormFile Image { get; set; }
     public required string AltText { get; set; }
     public required uint Width { get; set; }
     public required uint Height { get; set; }

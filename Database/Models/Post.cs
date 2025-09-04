@@ -31,11 +31,10 @@ public class Post
         slug = Regex.Replace(slug, @"-+", "-"); // Ensure single dashes
 
         // Calculate the estimated reading time
-        var wordCount = newPost.ArticleContent?.Split([' ', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
+        var wordCount = newPost.ArticleContent.Split([' ', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length;
         // TODO: move into a helper function
         // TODO: handle markdown and images in
         var readTime = (int)Math.Round((double)wordCount / 265);
-
 
         return new Post
         {
