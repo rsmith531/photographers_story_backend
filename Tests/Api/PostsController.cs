@@ -99,11 +99,12 @@ public class PostsControllerTests
     public async Task UpdatePost_Returns_NoContent_When_Post_Updated()
     {
         // Arrange
-        var post = Post.Create(new Builders.PostBuilder().Build());
+        var postData = new Builders.PostBuilder().Build();
+        var post = Post.Create(postData);
         _mockDatabaseService.Setup(s => s.UpdatePostAsync(post.Id, post)).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.UpdatePost(post.Id, post);
+        var result = await _controller.UpdatePost(post.Id, postData);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
