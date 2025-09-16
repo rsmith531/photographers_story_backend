@@ -1,5 +1,7 @@
 // Database/Models/Post.cs
+
 using System.Text.RegularExpressions;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Bson;
 
@@ -93,4 +95,19 @@ public class PostDTO
     public required string ArticleContent { get; set; }
     public required bool IsPublished { get; set; }
     public required LocationDTO Location { get; set; }
+}
+
+public class PostDTOValidator : AbstractValidator<PostDTO>
+{
+    public PostDTOValidator()
+    {
+        RuleForEach(post => post.Tags).NotNull().MaximumLength(15);
+        RuleFor(post => post.Author).NotNull();
+        RuleFor(post => post.Title).NotNull().MaximumLength(80);
+        RuleFor(post => post.Summary).NotNull().MaximumLength(300);
+        RuleFor(post => post.CoverPhoto).SetValidator(new PhotoDTOValidator());
+        RuleForEach(post => post.PhotosMetadata).SetValidator(new PhotoDTOValidator());
+        RuleFor(post => post.ArticleContent).NotNull();
+        RuleFor(post => post.Location).SetValidator(new LocationDTOValidator());
+    }
 }
