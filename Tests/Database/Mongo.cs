@@ -27,6 +27,7 @@ namespace Tests.Database;
 
 public class MongoPostsServiceTests
 {
+    private readonly Mock<IMongoDatabase> _mockDatabase;
     private readonly Mock<IMongoCollection<Post>> _mockCollection;
     private readonly Mock<IAsyncCursor<Post>> _mockCursor;
     private readonly Posts _service;
@@ -34,6 +35,7 @@ public class MongoPostsServiceTests
     public MongoPostsServiceTests()
     {
         // Set up the mocks
+        _mockDatabase = new Mock<IMongoDatabase>();
         _mockCollection = new Mock<IMongoCollection<Post>>();
         _mockCursor = new Mock<IAsyncCursor<Post>>();
 
@@ -42,8 +44,13 @@ public class MongoPostsServiceTests
             .ReturnsAsync(true)
             .ReturnsAsync(false);
 
+        _mockDatabase.Setup(db => db.GetCollection<Post>(
+                "posts",
+                It.IsAny<MongoCollectionSettings>()))
+            .Returns(_mockCollection.Object);
+
         // Instantiate the service using the mocked collection
-        _service = new Posts(_mockCollection.Object);
+        _service = new Posts(_mockDatabase.Object);
     }
 
     [Fact]

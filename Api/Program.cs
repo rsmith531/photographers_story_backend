@@ -8,12 +8,11 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Net; // IP address parser
 using Database.Mongo.Services;
 using Database.Connection;
-using Microsoft.Extensions.Options;
 using Database.Interfaces;
 using Storage.Interfaces;
 using Storage.Minio.Services;
 using Minio;
-using Storage.Connection;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,24 +40,20 @@ builder.Services.AddOpenApi();
 // Conditionally configure the database service based on the environment
 if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
 {
-    // Bind the MongoDbDatabase section of appsettings.json to the settings class
-    builder.Services.Configure<Mongo>(
-        // from appsettings.json
-        builder.Configuration.GetSection("MongoDbDatabase")
-    );
+    // get mongo connection config from appsettings.json
+    var mongoSettings = builder.Configuration.GetSection("MongoDbDatabase").Get<Mongo>();
 
-    // Register the MongoDbService as a singleton, injecting the settings
-    builder.Services.AddSingleton<IDatabaseService>(sp =>
-    {
-        var settings = sp.GetRequiredService<IOptions<Mongo>>().Value;
-        return new Posts(settings.ConnectionString, settings.DatabaseName);
-    });
+    if (mongoSettings == null)
+        throw new ArgumentNullException(nameof(mongoSettings));
 
-    
-    builder.Services.Configure<MinioConnection>(
-        // from appsettings.json
-        builder.Configuration.GetSection("MinioStorage")
-    );
+    // register a mongo client to the builder
+    builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings.ConnectionString));
+
+    builder.Services.AddScoped(sp =>
+      sp.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
+
+    // register the database from the mongo client
+    builder.Services.AddSingleton<IDatabaseService, Posts>();
 
     // TODO: figure out how to get the type safe settings
     // var minioSettings = GetRequiredService<IOptions<MinioConnection>>().Value;
