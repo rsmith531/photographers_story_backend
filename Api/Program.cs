@@ -10,6 +10,9 @@ using Database.Mongo.Services;
 using Database.Connection;
 using Microsoft.Extensions.Options;
 using Database.Interfaces;
+using FluentValidation;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Database.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +34,13 @@ builder.Services.AddOutputCache(options =>
 });
 
 builder.Services.AddControllers();
+
+// add validator services
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddScoped<IValidator<PhotoDTO>, PhotoDTOValidator>();
+builder.Services.AddScoped<IValidator<LocationDTO>, LocationDTOValidator>();
+builder.Services.AddScoped<IValidator<PostDTO>, PostDTOValidator>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

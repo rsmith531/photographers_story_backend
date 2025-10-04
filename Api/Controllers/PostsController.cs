@@ -1,8 +1,11 @@
 // Api/Controllers/PostsController.cs
 
+// validation: https://treblle.com/blog/comprehensive-guide-user-input-validation-dotnet-rest-apis
+
 using Microsoft.AspNetCore.Mvc;
 using Database.Interfaces;
 using Database.Models;
+using Api.Validation;
 
 namespace Api.Controllers;
 
@@ -41,7 +44,10 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     [EndpointSummary("Get a post by its slug")]
     [ProducesResponseType(typeof(Post), StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, "application/json")]
-    public async Task<IActionResult> GetPostBySlug(string slug)
+    public async Task<IActionResult> GetPostBySlug(
+        [Slug]
+        string slug
+    )
     {
         var post = await _databaseService.GetBySlugAsync(slug);
 
@@ -82,7 +88,7 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, "application/json")]
-    public async Task<IActionResult> UpdatePost(string id, [FromForm] PostDTO updatedPost)
+    public async Task<IActionResult> UpdatePost([MongoId] string id, [FromForm] PostDTO updatedPost)
     {
         await _databaseService.UpdatePostAsync(id, Post.Create(updatedPost));
         return NoContent();
@@ -96,7 +102,10 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     [HttpPut("{id}/views")]
     [EndpointSummary("Increment a post's view count")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> IncrementViewCount(string id)
+    public async Task<IActionResult> IncrementViewCount(
+        [MongoId]
+        string id
+    )
     {
         await _databaseService.IncrementViewCountAsync(id);
         return NoContent();
@@ -111,7 +120,10 @@ public class PostsController(IDatabaseService databaseService) : ControllerBase
     [EndpointSummary("Get posts by tag")]
     [ProducesResponseType(typeof(IEnumerable<Post>), StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, "application/json")]
-    public async Task<IActionResult> GetPostsByTag(string tag)
+    public async Task<IActionResult> GetPostsByTag(
+        [MongoId]
+        string tag
+    )
     {
         var posts = await _databaseService.GetPostsByTagAsync(tag);
 

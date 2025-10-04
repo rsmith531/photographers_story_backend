@@ -3,13 +3,16 @@ This project follows the tutorial described [here](https://learn.microsoft.com/e
 To run the project: 
 
 ```ps
+cd Api/;
 dotnet run --launch-profile https
 ```
 
-To develop the API using Swagger:
+To see the resultant OpenAPI specs:
 
 ```
-https://localhost:7197/swagger
+https://localhost:5001/api/swagger
+https://localhost:5001/api/scalar
+https://localhost:5001/api/redoc
 ```
 
 To run the test suites:
