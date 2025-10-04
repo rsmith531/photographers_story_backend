@@ -13,6 +13,7 @@ using Storage.Interfaces;
 using Storage.Minio.Services;
 using Minio;
 using MongoDB.Driver;
+using Storage.Connection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,12 +56,14 @@ if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
     // register the database from the mongo client
     builder.Services.AddSingleton<IDatabaseService, Posts>();
 
-    // TODO: figure out how to get the type safe settings
-    // var minioSettings = GetRequiredService<IOptions<MinioConnection>>().Value;
+    var minioSettings = builder.Configuration.GetSection("MinioStorage").Get<MinioConnection>();
+
+    if (minioSettings == null)
+        throw new ArgumentNullException(nameof(minioSettings));
 
     builder.Services.AddMinio((configureClient) => configureClient
-        .WithEndpoint(builder.Configuration["Minio:Endpoint"])
-        .WithCredentials(builder.Configuration["Minio:AccessKey"], builder.Configuration["Minio:SecretKey"])
+        .WithEndpoint(minioSettings.Endpoint)
+        .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey)
         .WithSSL(false)
         .Build()
     );
