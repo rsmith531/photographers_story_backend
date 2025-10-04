@@ -24,10 +24,11 @@ public interface IDatabaseService
     Task<Post?> GetBySlugAsync(string slug);
 
     /// <summary>
-    /// Creates a new post in the database.
+    /// Creates a new post in the database and returns its generated slug.
     /// </summary>
     /// <param name="newPost">The post to create.</param>
-    Task CreatePostAsync(Post newPost);
+    /// <returns>The generated slug of the newly created post.</returns>
+    Task<string> CreatePostAsync(PostDTO newPost);
 
     /// <summary>
     /// Updates an existing post.

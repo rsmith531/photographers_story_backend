@@ -2,11 +2,14 @@
 
 using MongoDB.Driver;
 using Database.Interfaces;
+using System.Text.RegularExpressions;
+using MongoDB.Bson;
 
 namespace Database.Mongo.Services;
 
 public class Posts(IMongoCollection<Models.Post> postsCollection) : IDatabaseService
 {
+
     private readonly IMongoCollection<Models.Post> _postsCollection = postsCollection;
 
     public Posts(string connectionString, string databaseName) : this(
@@ -34,10 +37,14 @@ public class Posts(IMongoCollection<Models.Post> postsCollection) : IDatabaseSer
     }
 
     /// <inheritdoc />
-    public async Task CreatePostAsync(Database.Models.Post newPost)
+    public async Task<string> CreatePostAsync(Database.Models.PostDTO newPost)
     {
-        var mongoPost = Models.Post.FromCore(newPost);
+        var post = Database.Models.Post.Create(newPost);
+
+        var mongoPost = Models.Post.FromCore(post);
         await _postsCollection.InsertOneAsync(mongoPost);
+
+        return post.Slug;
     }
 
     /// <inheritdoc />
