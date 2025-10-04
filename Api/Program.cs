@@ -10,6 +10,10 @@ using Database.Mongo.Services;
 using Database.Connection;
 using Microsoft.Extensions.Options;
 using Database.Interfaces;
+using Storage.Interfaces;
+using Storage.Minio.Services;
+using Minio;
+using Storage.Connection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +43,7 @@ if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
 {
     // Bind the MongoDbDatabase section of appsettings.json to the settings class
     builder.Services.Configure<Mongo>(
+        // from appsettings.json
         builder.Configuration.GetSection("MongoDbDatabase")
     );
 
@@ -48,6 +53,23 @@ if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
         var settings = sp.GetRequiredService<IOptions<Mongo>>().Value;
         return new Posts(settings.ConnectionString, settings.DatabaseName);
     });
+
+    
+    builder.Services.Configure<MinioConnection>(
+        // from appsettings.json
+        builder.Configuration.GetSection("MinioStorage")
+    );
+
+    // TODO: figure out how to get the type safe settings
+    // var minioSettings = GetRequiredService<IOptions<MinioConnection>>().Value;
+
+    builder.Services.AddMinio((configureClient) => configureClient
+        .WithEndpoint(builder.Configuration["Minio:Endpoint"])
+        .WithCredentials(builder.Configuration["Minio:AccessKey"], builder.Configuration["Minio:SecretKey"])
+        .WithSSL(false)
+        .Build()
+    );
+    builder.Services.AddScoped<IStorageService, MinioStorageService>();
 }
 
 var app = builder.Build();
